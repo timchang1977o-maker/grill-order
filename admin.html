@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>炭烤接單</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#2b1d16">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@900&display=swap">
+<style>
+/* 版型：老闆看單——頂欄統計＋狀態篩選＋單卡（號碼大字、品項清單、一鍵改狀態） */
+:root{
+  color-scheme: light;
+  --char:#2b1d16; --ember:#d9542b; --ember-soft:#fbe7dd; --paper:#f6f1eb; --card:#fff;
+  --ink:#2a211c; --muted:#7a6a60; --line:#e6d9cd; --ok:#2f7d4f; --ok-soft:#e3f2e8; --amber:#7a5200; --amber-soft:#fff3d6;
+  --f-display:"Noto Serif TC","Songti TC",serif; --f-body:"Noto Sans TC","PingFang TC","Heiti TC",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--f-body)}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{background:var(--char);color:#fff;padding-top:env(safe-area-inset-top,0px);position:sticky;top:0;z-index:5}
+header .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding-block:12px}
+h1{font:900 24px var(--f-display);margin:0;letter-spacing:.06em}
+.stats{display:flex;gap:16px;font-variant-numeric:tabular-nums;color:#e9dcd2;font-size:13px}
+.stats b{color:#fff;font-size:18px;margin-left:4px}
+.sp{flex:1}
+.hbtn{background:#3a2a21;color:#fff;border:0;border-radius:999px;padding:7px 14px;font:500 13px var(--f-body);cursor:pointer}
+.hbtn.on{background:var(--ok)}
+.filters{display:flex;gap:6px;padding-block:12px;flex-wrap:wrap}
+.filters button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 14px;font:500 14px var(--f-body);color:var(--ink);cursor:pointer}
+.filters button.sel{background:var(--char);color:#fff;border-color:var(--char)}
+.filters input{border:1px solid var(--line);border-radius:999px;padding:5px 12px;font:14px var(--f-body);background:#fff;color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;padding-bottom:40px}
+.o{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--ember);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.o.s-製作中{border-left-color:#d9a21b}.o.s-可取餐{border-left-color:var(--ok)}.o.s-已取餐,.o.s-取消{border-left-color:#bbb;opacity:.7}
+.o.fresh{animation:flash 1.2s ease-in-out 3}
+@keyframes flash{50%{background:var(--ember-soft)}}
+.o .h{display:flex;align-items:baseline;gap:10px}
+.o .no{font:900 34px/1 var(--f-display);color:var(--ember)}
+.o .who{font-weight:700;min-width:0;overflow-wrap:anywhere}
+.o .t{margin-left:auto;color:var(--muted);font-size:13px;white-space:nowrap;text-align:right}
+.o .pk{font-weight:700;color:var(--ink)}
+.o ul{margin:0;padding:0;list-style:none;border-top:1px dashed var(--line)}
+.o li{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px dashed var(--line);font-size:16px}
+.o li b{font-variant-numeric:tabular-nums}
+.o .meta{font-size:14px;color:var(--muted)}
+.o .meta .note{color:#7a2e14;background:var(--ember-soft);border-radius:6px;padding:2px 6px}
+.o .tot{display:flex;justify-content:space-between;font-weight:900;font-variant-numeric:tabular-nums}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.acts button{flex:1;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 4px;font:700 14px var(--f-body);color:var(--ink);cursor:pointer;min-width:52px}
+.acts button.cur{background:var(--char);color:#fff;border-color:var(--char)}
+.acts button.cancel{flex:0 0 auto;color:#8a1c1c;font-weight:500}
+.empty{color:var(--muted);text-align:center;padding:40px 0}
+.login{max-width:340px;margin:12vh auto 0;background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px}
+.login input{font:24px var(--f-body);letter-spacing:.3em;text-align:center;padding:10px;border:1px solid var(--line);border-radius:10px;color:var(--ink);background:#fff}
+.login button{border:0;border-radius:12px;padding:12px;font:700 16px var(--f-body);background:var(--ember);color:#fff;cursor:pointer}
+.err{color:#b3261e;font-size:14px;min-height:20px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--char);color:#fff;padding:8px 16px;border-radius:999px;font-size:14px;z-index:9}
+button:focus-visible,input:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.o.fresh{animation:none;background:var(--ember-soft)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast" hidden></div>
+<script>
+const API = "https://script.google.com/macros/s/AKfycbyv1vI3j57B04XtweQrz2TyTCee1aovRqao6msWlXbeGBrSg4KbXBTLQ9dQwQrZYVMZ/exec";
+const STEPS = ["新單","製作中","可取餐","已取餐"];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const store = {
+  get(k, d){ try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+let pin = store.get("pin", "");
+let orders = [], seen = null, filter = store.get("filter", "open"), sound = false, audio = null, wake = null, timer = null;
+let day = new Date(Date.now() + 8*3600e3).toISOString().slice(0,10);
+
+async function post(body){
+  const res = await fetch(API, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(body)});
+  return res.json();
+}
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2200); }
+
+function loginView(err=""){
+  $("#app").innerHTML = `<form class="login" id="login">
+    <h1 style="color:var(--ink);text-align:center">炭烤接單</h1>
+    <label for="pin" style="color:var(--muted);font-size:13px;text-align:center">輸入老闆密碼（6 碼）</label>
+    <input id="pin" inputmode="numeric" autocomplete="current-password" maxlength="6" value="">
+    <div class="err">${esc(err)}</div>
+    <button type="submit">進入</button></form>`;
+  $("#login").addEventListener("submit", async e => {
+    e.preventDefault(); pin = $("#pin").value.trim();
+    const r = await post({op:"list", pin, day}).catch(() => ({ok:false, error:"網路不穩，再試一次"}));
+    if (!r.ok) return loginView(r.error);
+    store.set("pin", pin); boardView(); apply(r);
+  });
+  $("#pin").focus();
+}
+function boardView(){
+  $("#app").innerHTML = `<header><div class="wrap">
+      <h1>炭烤接單</h1>
+      <div class="stats"><span>今日<b id="sN">0</b> 張</span><span>待做<b id="sOpen">0</b></span><span>營收<b id="sAmt">$0</b></span></div>
+      <span class="sp"></span>
+      <button class="hbtn" id="soundBtn" type="button">開啟新單提示音</button>
+      <button class="hbtn" id="logoutBtn" type="button">登出</button>
+    </div></header>
+    <div class="wrap">
+      <div class="filters" id="filters">
+        ${[["open","未完成"],["新單","新單"],["製作中","製作中"],["可取餐","可取餐"],["all","全部"]].map(([k,l]) => `<button type="button" data-f="${k}" class="${k===filter?"sel":""}">${l}</button>`).join("")}
+        <span class="sp"></span><input type="date" id="day" value="${day}" aria-label="日期">
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>`;
+  $("#filters").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; filter = b.dataset.f; store.set("filter", filter);
+    document.querySelectorAll("#filters button").forEach(x => x.classList.toggle("sel", x===b)); render(); });
+  $("#day").addEventListener("change", e => { day = e.target.value; seen = null; load(); });
+  $("#soundBtn").addEventListener("click", toggleSound);
+  $("#logoutBtn").addEventListener("click", () => { store.set("pin", ""); pin = ""; clearInterval(timer); loginView(); });
+  $("#grid").addEventListener("click", async e => {
+    const b = e.target.closest(".acts button"); if (!b) return;
+    const id = b.closest(".o").dataset.id, status = b.dataset.s;
+    const o = orders.find(x => x.id === id); if (!o || o.status === status) return;
+    const prev = o.status; o.status = status; render();
+    const r = await post({op:"status", pin, id, status}).catch(() => ({ok:false, error:"網路不穩"}));
+    if (!r.ok) { o.status = prev; render(); toast("沒改成功：" + r.error); } else toast(`#${o.no} → ${status}`);
+  });
+  clearInterval(timer); timer = setInterval(load, 10000);
+}
+async function load(){
+  const r = await post({op:"list", pin, day}).catch(() => null);
+  if (!r) return;
+  if (!r.ok) { store.set("pin", ""); return loginView(r.error); }
+  apply(r);
+}
+function apply(r){
+  const fresh = [];
+  if (seen) r.orders.forEach(o => { if (!seen.has(o.id)) fresh.push(o.id); });
+  seen = new Set(r.orders.map(o => o.id));
+  orders = r.orders;
+  render(fresh);
+  if (fresh.length) { beep(); document.title = `(${fresh.length}) 新單！炭烤接單`; setTimeout(() => document.title = "炭烤接單", 8000); }
+}
+function render(fresh=[]){
+  const live = orders.filter(o => o.status !== "取消");
+  $("#sN").textContent = live.length;
+  $("#sOpen").textContent = live.filter(o => o.status === "新單" || o.status === "製作中").length;
+  $("#sAmt").textContent = "$" + live.reduce((a,o) => a + Number(o.total||0), 0).toLocaleString();
+  let list = orders.slice();
+  if (filter === "open") list = list.filter(o => o.status === "新單" || o.status === "製作中" || o.status === "可取餐");
+  else if (filter !== "all") list = list.filter(o => o.status === filter);
+  // 未完成的照下單先後（先來先做），其他新的在前
+  list.sort((a,b) => filter === "all" ? b.createdAt.localeCompare(a.createdAt) : a.createdAt.localeCompare(b.createdAt));
+  $("#grid").innerHTML = list.length ? list.map(o => `
+    <div class="o s-${esc(o.status)}${fresh.includes(o.id)?" fresh":""}" data-id="${esc(o.id)}">
+      <div class="h"><span class="no">${esc(o.no)}</span><span class="who">${esc(o.name)}${o.phone?`<br><span style="font-weight:400;color:var(--muted);font-size:13px">${esc(o.phone)}</span>`:""}</span>
+        <span class="t">${esc(o.createdAt.slice(11,16))} 下單<br><span class="pk">${esc(o.pickup)}</span></span></div>
+      <ul>${o.items.map(i => `<li><span>${esc(i.n)}${i.v?`（${esc(i.v)}）`:""}</span><b>× ${i.q}</b></li>`).join("")}</ul>
+      <div class="meta">${esc(o.spicy)}${o.note?`　<span class="note">${esc(o.note)}</span>`:""}</div>
+      <div class="tot"><span>合計</span><span>$${esc(o.total)}${o.hasMarket?"＋時價":""}</span></div>
+      <div class="acts">${STEPS.map(s => `<button type="button" data-s="${s}" class="${s===o.status?"cur":""}">${s}</button>`).join("")}
+        <button type="button" class="cancel${o.status==="取消"?" cur":""}" data-s="取消">取消</button></div>
+    </div>`).join("") : `<div class="empty">${filter==="open"?"目前沒有要做的單。新單進來會自動出現。":"這個分類沒有訂單。"}</div>`;
+}
+async function toggleSound(){
+  sound = !sound;
+  $("#soundBtn").classList.toggle("on", sound);
+  $("#soundBtn").textContent = sound ? "提示音：開" : "開啟新單提示音";
+  if (sound) {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    audio.resume(); beep();
+    try { wake = await navigator.wakeLock?.request("screen"); } catch {}
+  } else { try { wake?.release(); } catch {} wake = null; }
+}
+function beep(){
+  if (!sound || !audio) return;
+  [0, .25, .5].forEach(t => {
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.frequency.value = 880; o.connect(g); g.connect(audio.destination);
+    g.gain.setValueAtTime(.0001, audio.currentTime + t); g.gain.exponentialRampToValueAtTime(.4, audio.currentTime + t + .02);
+    g.gain.exponentialRampToValueAtTime(.0001, audio.currentTime + t + .2);
+    o.start(audio.currentTime + t); o.stop(audio.currentTime + t + .22);
+  });
+}
+document.addEventListener("visibilitychange", async () => { if (!document.hidden && sound) { try { wake = await navigator.wakeLock?.request("screen"); } catch {} load(); } });
+if (pin) { boardView(); load(); } else loginView();
+</script>
+</body>
+</html>

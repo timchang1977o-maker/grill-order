@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>炭烤點餐</title>
+<meta name="theme-color" content="#2b1d16">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@900&display=swap">
+<style>
+/* 版型：深炭色頂欄＋價位分組菜單（同價一區，色塊對應店家價目表）＋底部購物袋浮條 */
+:root{
+  color-scheme: light;
+  --char:#2b1d16; --ember:#d9542b; --ember-soft:#fbe7dd; --paper:#fbf7f2; --card:#ffffff;
+  --ink:#2a211c; --muted:#7a6a60; --line:#eadfd5; --ok:#2f7d4f; --ok-soft:#e3f2e8; --warn:#b7791f;
+  --p22:#6b3a8c; --p25:#c8683a; --p20:#c8683a; --p30:#a49a2c; --pbig:#21479b; --ice:#2c8c99;
+  --f-display:"Noto Serif TC","Songti TC",serif; --f-body:"Noto Sans TC","PingFang TC","Heiti TC",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--f-body);-webkit-tap-highlight-color:transparent;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{background:var(--char);color:#fff;padding-top:env(safe-area-inset-top,0px)}
+header.top .wrap{padding-block:18px 14px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-family:var(--f-display);font-size:30px;margin:0;letter-spacing:.06em;line-height:1.1}
+h1 small{display:block;font:500 12px/1.4 var(--f-body);letter-spacing:.12em;color:#e9c9b6;margin-top:6px}
+.mybtn{background:transparent;color:#fff;border:1px solid #6b5447;border-radius:999px;padding:7px 14px;font:500 13px var(--f-body);cursor:pointer;white-space:nowrap}
+nav.tabs{position:sticky;top:0;z-index:5;background:var(--char);border-bottom:1px solid #000}
+nav.tabs .wrap{display:flex;gap:6px;overflow-x:auto;padding-block:8px;scrollbar-width:none}
+nav.tabs .wrap::-webkit-scrollbar{display:none}
+nav.tabs a{flex:none;color:#e9dcd2;text-decoration:none;font-size:13px;padding:6px 12px;border-radius:999px;background:#3a2a21}
+nav.tabs a b{color:#fff;margin-left:4px}
+.notice{margin:14px 0 4px;padding:10px 12px;border-radius:10px;background:var(--ember-soft);color:#7a2e14;font-size:13px}
+section.grp{margin-top:22px}
+.grp-h{display:flex;align-items:baseline;gap:10px;margin:0 0 10px}
+.grp-h .tag{font:900 20px var(--f-display);color:#fff;padding:2px 12px;border-radius:8px;background:var(--c)}
+.grp-h h2{font-size:15px;margin:0;color:var(--muted);font-weight:500}
+.list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:380px){.list{grid-template-columns:1fr}}
+.item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 10px 10px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.item.on{border-color:var(--ember);box-shadow:0 0 0 1px var(--ember) inset}
+.item .r1{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.item .nm{font-weight:700;font-size:15px;min-width:0}
+.item .pr{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;white-space:nowrap}
+.item .pr.mk{color:var(--warn);font-weight:700}
+.vs{display:flex;gap:4px;flex-wrap:wrap}
+.vs button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px 9px;font:500 13px var(--f-body);color:var(--ink);cursor:pointer}
+.vs button.sel{background:var(--char);color:#fff;border-color:var(--char)}
+.qty{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.qty button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:#fff;font:700 18px/1 var(--f-body);color:var(--ink);cursor:pointer}
+.qty button.plus{background:var(--ember);border-color:var(--ember);color:#fff}
+.qty span{min-width:22px;text-align:center;font-variant-numeric:tabular-nums;font-weight:700}
+.qty button:disabled{opacity:.35}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--char);color:#fff;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -6px 20px rgba(0,0,0,.18)}
+.bar .wrap{display:flex;align-items:center;gap:12px;padding-block:12px}
+.bar .sum{flex:1;min-width:0}
+.bar .sum b{font-size:22px;font-variant-numeric:tabular-nums}
+.bar .sum small{display:block;color:#d8c6ba;font-size:12px}
+.btn{border:0;border-radius:12px;padding:12px 20px;font:700 16px var(--f-body);cursor:pointer;background:var(--ember);color:#fff}
+.btn:disabled{background:#6b5447;color:#cbb9ad;cursor:default}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
+/* 結帳／訂單面板 */
+.sheet{position:fixed;inset:0;z-index:30;background:rgba(20,12,8,.5);display:flex;align-items:flex-end;justify-content:center}
+.panel{background:var(--paper);width:100%;max-width:720px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.panel h3{margin:0 0 12px;font:900 22px var(--f-display);display:flex;justify-content:space-between;align-items:center}
+.panel h3 button{border:0;background:none;font-size:26px;line-height:1;color:var(--muted);cursor:pointer}
+.lines{background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px 12px;margin-bottom:14px}
+.line{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-variant-numeric:tabular-nums}
+.line:last-child{border-bottom:0}
+.line.tot{font-weight:900;font-size:17px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:13px;color:var(--muted);font-weight:500}
+.field input,.field select,.field textarea{font:16px var(--f-body);padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);width:100%}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font:500 14px var(--f-body);color:var(--ink);cursor:pointer}
+.chips button.sel{background:var(--char);color:#fff;border-color:var(--char)}
+.err{color:#b3261e;font-size:14px;min-height:20px;margin:4px 0 10px}
+.receipt{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center}
+.receipt .no{font:900 56px/1 var(--f-display);color:var(--ember);letter-spacing:.04em;margin:8px 0}
+.st{display:inline-block;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700;background:var(--ember-soft);color:#7a2e14}
+.st.s-製作中{background:#fff3d6;color:#7a5200}.st.s-可取餐{background:var(--ok-soft);color:var(--ok)}.st.s-已取餐{background:#eee;color:#666}.st.s-取消{background:#f4dede;color:#8a1c1c}
+.mine{display:flex;flex-direction:column;gap:8px}
+.mine .o{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.mine .o .h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700}
+.mine .o .d{color:var(--muted);font-size:13px;margin-top:4px}
+.empty{color:var(--muted);text-align:center;padding:20px 0}
+footer{color:var(--muted);font-size:12px;text-align:center;margin:28px 0 8px}
+@media (prefers-reduced-motion:no-preference){.panel{animation:up .22s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <h1>炭烤點餐<small>線上點餐・到店取餐</small></h1>
+  <button class="mybtn" id="mineBtn" type="button">我的訂單</button>
+</div></header>
+<nav class="tabs"><div class="wrap" id="tabs"></div></nav>
+<main class="wrap">
+  <div class="notice">因維持食材品質，雞排＆魷魚一律不剪。價格如有變動，以現場價目表為準。</div>
+  <div id="menu"></div>
+  <footer>點完送出後，老闆那邊會即時收到訂單。</footer>
+</main>
+<div class="bar"><div class="wrap">
+  <div class="sum"><b id="sumTotal">$0</b><small id="sumInfo">還沒選餐點</small></div>
+  <button class="btn" id="checkoutBtn" type="button" disabled>確認訂單</button>
+</div></div>
+<div class="sheet" id="sheet" hidden><div class="panel" id="panel"></div></div>
+
+<script>
+// 送單網址：Apps Script Web App（gateway.gs）
+const API = "https://script.google.com/macros/s/AKfycbyv1vI3j57B04XtweQrz2TyTCee1aovRqao6msWlXbeGBrSg4KbXBTLQ9dQwQrZYVMZ/exec";
+const GROUPS = [
+  {id:"g22", tag:"22元", c:"var(--p22)", items:[["heilun","手工黑輪",22],["xinxin","鑫鑫腸",22],["sausage","原味香腸",22],["yuqian","芋簽",22],["mixue","米血",22]]},
+  {id:"g25", tag:"25元", c:"var(--p25)", items:[["nugget","麥克雞塊",25],["eggplant","茄子",25],["pepper","青椒",25],["gongwan","貢丸",25],["squidball","花枝丸",25],["baiye","百頁豆腐",25],["fishtofu","魚豆腐",25],["hotdog","熱狗棒",25],["codcake","鱈魚板",25],["stinky","臭豆腐",25],["tianbula","甜不辣",25,{"片":25,"條":25}],["dougan","豆干",25],["king","杏鮑菇",25],["shiitake","香菇",25],["bean","四季豆",25],["bamboo","筊白筍",null],["corn","玉米",null]]},
+  {id:"g20", tag:"20元", c:"var(--p20)", items:[["tenderloin","紐奧良雞里肌",20],["porkstrip","黑胡椒豬肉條",20]]},
+  {id:"g30", tag:"30元", c:"var(--p30)", items:[["migchang","米腸",30],["chheart","雞心",30],["gizzard","雞腱",30],["doupi","豆皮",30],["enoki","豬肉金針菇串",30],["scallion","豬肉蔥串",30],["chint","雞腸",30],["chskin","雞皮",30],["cartilage","雞軟骨",30],["broccoli","綠花椰",30],["zucchini","櫛瓜",30]]},
+  {id:"gbig", tag:"肉串・海鮮", c:"var(--pbig)", items:[["cutlet","碳烤脆皮雞排",95],["squid","魷魚串",170],["legskewer","雞腿肉串",50],["butt","雞屁股",45],["wing","雞翅",35],["saury","秋刀魚",90],["legroll","雞腿肉捲",50],["lamb","特選小羔羊",45],["beef","特選牛肋串",50],["shishamo","柳葉魚",35]]},
+  {id:"gice", tag:"冰沙", c:"var(--ice)", items:[["s_mung","綠豆冰沙",55,{"大":55,"中":50,"小":45}],["s_mango","芒果冰沙",55,{"大":55,"中":50,"小":45}],["s_peanut","花生冰沙",60,{"大":60,"中":55,"小":50}],["s_taro","芋頭冰沙",65,{"大":65,"中":60,"小":55}]]},
+];
+const ITEM = {};
+GROUPS.forEach(g => g.items.forEach(([k,n,p,vs]) => ITEM[k] = {k,n,p,vs}));
+// 購物袋：key＝k|規格 → 數量
+const cart = new Map();
+const pick = {};  // 每個有規格的品項目前選的規格
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const priceOf = (it, v) => it.vs ? it.vs[v] : it.p;
+const store = {
+  get(k, d){ try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+
+function renderMenu(){
+  $("#tabs").innerHTML = GROUPS.map(g => `<a href="#${g.id}">${esc(g.tag)}<b id="cnt-${g.id}"></b></a>`).join("");
+  $("#menu").innerHTML = GROUPS.map(g => `
+    <section class="grp" id="${g.id}" style="--c:${g.c}">
+      <div class="grp-h"><span class="tag">${esc(g.tag)}</span><h2>${g.id==="gice"?"大／中／小杯":g.id==="gbig"?"各品項單價":"每串同價"}</h2></div>
+      <div class="list">${g.items.map(([k]) => itemHTML(ITEM[k])).join("")}</div>
+    </section>`).join("");
+}
+function itemHTML(it){
+  if (it.vs && !pick[it.k]) pick[it.k] = Object.keys(it.vs)[0];
+  const v = it.vs ? pick[it.k] : "";
+  const q = cart.get(it.k + "|" + v) || 0;
+  const total = [...cart.entries()].filter(([key]) => key.startsWith(it.k + "|")).reduce((a,[,n]) => a+n, 0);
+  const p = priceOf(it, v);
+  return `<div class="item${total?" on":""}" data-k="${it.k}">
+    <div class="r1"><span class="nm">${esc(it.n)}</span><span class="pr${p==null?" mk":""}">${p==null?"時價":"$"+p}</span></div>
+    ${it.vs ? `<div class="vs">${Object.keys(it.vs).map(x => `<button type="button" data-v="${esc(x)}" class="${x===v?"sel":""}">${esc(x)}${new Set(Object.values(it.vs)).size>1?" $"+it.vs[x]:""}</button>`).join("")}</div>` : ""}
+    <div class="qty">${total && it.vs && q===0 ? `<span style="font-size:12px;color:var(--muted);font-weight:500;min-width:0">已點 ${total}</span>` : ""}
+      <button type="button" class="minus" aria-label="少一份" ${q?"":"disabled"}>−</button><span>${q}</span><button type="button" class="plus" aria-label="多一份">＋</button></div>
+  </div>`;
+}
+function refreshItem(k){
+  const el = document.querySelector(`.item[data-k="${k}"]`);
+  el.outerHTML = itemHTML(ITEM[k]);
+  refreshBar();
+}
+function cartLines(){
+  return [...cart.entries()].filter(([,q]) => q>0).map(([key,q]) => {
+    const [k,v] = key.split("|"); const it = ITEM[k];
+    return {k, v, q, n: it.n, p: priceOf(it, v)};
+  });
+}
+function refreshBar(){
+  const lines = cartLines();
+  const count = lines.reduce((a,l) => a+l.q, 0);
+  const total = lines.reduce((a,l) => a + (l.p ?? 0) * l.q, 0);
+  const mk = lines.some(l => l.p == null);
+  $("#sumTotal").textContent = "$" + total + (mk ? "＋時價" : "");
+  $("#sumInfo").textContent = count ? `共 ${count} 份` : "還沒選餐點";
+  $("#checkoutBtn").disabled = !count;
+  GROUPS.forEach(g => {
+    const n = lines.filter(l => g.items.some(([k]) => k===l.k)).reduce((a,l) => a+l.q, 0);
+    $("#cnt-"+g.id).textContent = n ? n : "";
+  });
+  store.set("draft", {cart:[...cart.entries()], pick});
+}
+$("#menu").addEventListener("click", e => {
+  const card = e.target.closest(".item"); if (!card) return;
+  const k = card.dataset.k, it = ITEM[k];
+  const vb = e.target.closest(".vs button");
+  if (vb) { pick[k] = vb.dataset.v; refreshItem(k); return; }
+  const key = k + "|" + (it.vs ? pick[k] : "");
+  if (e.target.closest(".plus")) cart.set(key, Math.min(50, (cart.get(key)||0) + 1));
+  else if (e.target.closest(".minus")) { const q = (cart.get(key)||0) - 1; q>0 ? cart.set(key,q) : cart.delete(key); }
+  else return;
+  refreshItem(k);
+});
+
+// ── 結帳 ──
+const SPICY = ["不辣","小辣","中辣","大辣"];
+let form = store.get("profile", {name:"", phone:"", spicy:"不辣"});
+form.pickup = "現在做"; form.note = "";
+function pickupOptions(){
+  const out = ["現在做"]; const d = new Date(); d.setMinutes(Math.ceil((d.getMinutes()+20)/10)*10, 0, 0);
+  for (let i=0;i<12;i++){ out.push(d.toTimeString().slice(0,5) + " 取"); d.setMinutes(d.getMinutes()+10); }
+  return out;
+}
+function openSheet(html){ $("#panel").innerHTML = html; $("#sheet").hidden = false; document.body.style.overflow = "hidden"; }
+function closeSheet(){ $("#sheet").hidden = true; document.body.style.overflow = ""; }
+$("#sheet").addEventListener("click", e => { if (e.target.id === "sheet" || e.target.closest("[data-close]")) closeSheet(); });
+
+function checkoutHTML(err=""){
+  const lines = cartLines();
+  const total = lines.reduce((a,l) => a + (l.p ?? 0) * l.q, 0);
+  const mk = lines.some(l => l.p == null);
+  return `<h3>確認訂單<button type="button" data-close aria-label="關閉">×</button></h3>
+    <div class="lines">${lines.map(l => `<div class="line"><span>${esc(l.n)}${l.v?`（${esc(l.v)}）`:""} × ${l.q}</span><span>${l.p==null?"時價":"$"+l.p*l.q}</span></div>`).join("")}
+      <div class="line tot"><span>合計</span><span>$${total}${mk?"＋時價":""}</span></div></div>
+    ${mk?`<div class="notice" style="margin-top:0">筊白筍、玉米是時價，取餐時現場算。</div>`:""}
+    <div class="row2">
+      <div class="field"><label for="f-name">稱呼（必填）</label><input id="f-name" maxlength="20" placeholder="例：王先生" value="${esc(form.name)}"></div>
+      <div class="field"><label for="f-phone">手機（選填）</label><input id="f-phone" maxlength="20" inputmode="tel" placeholder="0912…" value="${esc(form.phone)}"></div>
+    </div>
+    <div class="field"><label>辣度</label><div class="chips" id="f-spicy">${SPICY.map(s => `<button type="button" data-s="${s}" class="${s===form.spicy?"sel":""}">${s}</button>`).join("")}</div></div>
+    <div class="field"><label for="f-pickup">取餐時間</label><select id="f-pickup">${pickupOptions().map(p => `<option${p===form.pickup?" selected":""}>${p}</option>`).join("")}</select></div>
+    <div class="field"><label for="f-note">備註</label><textarea id="f-note" rows="2" maxlength="120" placeholder="例：不要蔥、醬少一點">${esc(form.note)}</textarea></div>
+    <div class="err" id="f-err">${esc(err)}</div>
+    <button class="btn" id="submitBtn" type="button" style="width:100%">送出訂單</button>`;
+}
+$("#checkoutBtn").addEventListener("click", () => openSheet(checkoutHTML()));
+$("#panel").addEventListener("click", async e => {
+  const sb = e.target.closest("#f-spicy button");
+  if (sb) { form.spicy = sb.dataset.s; document.querySelectorAll("#f-spicy button").forEach(b => b.classList.toggle("sel", b===sb)); return; }
+  if (e.target.id === "submitBtn") submit(e.target);
+  if (e.target.id === "againBtn") closeSheet();
+});
+async function submit(btn){
+  form.name = $("#f-name").value.trim(); form.phone = $("#f-phone").value.trim();
+  form.pickup = $("#f-pickup").value; form.note = $("#f-note").value.trim();
+  if (!form.name) { $("#f-err").textContent = "請填稱呼，老闆叫號才知道是誰。"; $("#f-name").focus(); return; }
+  btn.disabled = true; btn.textContent = "送出中…";
+  try {
+    const r = await post({op:"order", name:form.name, phone:form.phone, pickup:form.pickup, spicy:form.spicy, note:form.note,
+      items: cartLines().map(l => ({k:l.k, v:l.v, q:l.q}))});
+    if (!r.ok) throw new Error(r.error || "送出失敗");
+    store.set("profile", {name:form.name, phone:form.phone, spicy:form.spicy});
+    const mine = store.get("mine", []);
+    mine.unshift({id:r.id, no:r.no, at:Date.now(), total:r.total, hasMarket:r.hasMarket, items:r.items, pickup:form.pickup});
+    store.set("mine", mine.slice(0, 20));
+    cart.clear(); form.note = ""; renderMenu(); refreshBar();
+    openSheet(receiptHTML(mine[0], "新單"));
+    watch();
+  } catch (err) {
+    btn.disabled = false; btn.textContent = "送出訂單";
+    $("#f-err").textContent = (err.message === "Failed to fetch" ? "網路不穩，訂單沒送出，請再按一次。" : err.message);
+  }
+}
+async function post(body){
+  const res = await fetch(API, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(body)});
+  return res.json();
+}
+function itemsText(o){ return o.items.map(i => `${i.n}${i.v?`（${i.v}）`:""}×${i.q}`).join("、"); }
+function receiptHTML(o, status){
+  return `<h3>訂單已送出<button type="button" data-close aria-label="關閉">×</button></h3>
+    <div class="receipt">
+      <div style="color:var(--muted)">取餐號碼</div>
+      <div class="no">${esc(o.no)}</div>
+      <span class="st s-${esc(status)}" id="rcpt-st">${esc(status)}</span>
+      <div style="margin-top:14px;text-align:left" class="lines">
+        <div class="line"><span>${esc(itemsText(o))}</span></div>
+        <div class="line tot"><span>合計</span><span>$${o.total}${o.hasMarket?"＋時價":""}</span></div>
+        <div class="line"><span>取餐</span><span>${esc(o.pickup)}</span></div>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin:0">老闆做好會把狀態改成「可取餐」，這頁會自動更新。</p>
+    </div>
+    <button class="btn ghost" id="againBtn" type="button" style="width:100%;margin-top:14px">繼續點餐</button>`;
+}
+
+// ── 我的訂單（存在這支手機）＋狀態追蹤 ──
+let statusMap = {};
+function mineHTML(){
+  const mine = store.get("mine", []);
+  return `<h3>我的訂單<button type="button" data-close aria-label="關閉">×</button></h3>
+    ${mine.length ? `<div class="mine">${mine.map(o => `<div class="o"><div class="h"><span>#${esc(o.no)}　$${o.total}${o.hasMarket?"＋時價":""}</span><span class="st s-${esc(statusMap[o.id]||"新單")}">${esc(statusMap[o.id]||"新單")}</span></div>
+      <div class="d">${new Date(o.at).toLocaleString("zh-TW",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}・${esc(o.pickup)}<br>${esc(itemsText(o))}</div></div>`).join("")}</div>`
+      : `<div class="empty">這支手機還沒有點過餐。</div>`}`;
+}
+$("#mineBtn").addEventListener("click", () => { openSheet(mineHTML()); poll(); });
+let timer = null;
+async function poll(){
+  const mine = store.get("mine", []).filter(o => Date.now() - o.at < 12*3600e3);
+  if (!mine.length) return;
+  try {
+    const r = await post({op:"track", ids: mine.map(o => o.id)});
+    if (!r.ok) return;
+    r.orders.forEach(o => statusMap[o.id] = o.status);
+    const st = $("#rcpt-st"), last = store.get("mine", [])[0];
+    if (st && last && statusMap[last.id]) { st.textContent = statusMap[last.id]; st.className = "st s-" + statusMap[last.id]; }
+    if (!$("#sheet").hidden && $(".mine")) $("#panel").innerHTML = mineHTML();
+    if (!mine.some(o => ["新單","製作中"].includes(statusMap[o.id] || "新單"))) { clearInterval(timer); timer = null; }
+  } catch {}
+}
+function watch(){ if (!timer) timer = setInterval(poll, 15000); poll(); }
+
+// 還原未送出的購物袋
+const draft = store.get("draft", null);
+if (draft) { (draft.cart||[]).forEach(([k,q]) => { if (ITEM[k.split("|")[0]]) cart.set(k,q); }); Object.assign(pick, draft.pick||{}); }
+renderMenu(); refreshBar();
+if (store.get("mine", []).some(o => Date.now() - o.at < 3*3600e3)) watch();
+</script>
+</body>
+</html>
